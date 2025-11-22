@@ -1,37 +1,68 @@
 #include <iostream>
-#include <list>
 using namespace std;
 
+struct Node {
+    int key;
+    string value;
+    Node* next;
+    Node(int k,string v) {
+        key=k;
+        value=v;
+        next=NULL;
+    }
+};
+
 class Hash {
-    list<pair<int,string>> table[10];
+    Node* table[10];
 public:
+    Hash() {
+        for(int i=0;i<10;i++) table[i]=NULL;
+    }
+
     int hashFunc(int k) { return k%10; }
-    void insert(int k,string v) {
-        table[hashFunc(k)].push_back({k,v});
-    }
-    void removeKey(int k) {
+
+    void insertKey(int k,string v) {
         int idx = hashFunc(k);
-        for(auto it=table[idx].begin(); it!=table[idx].end(); it++) {
-            if(it->first==k) {
-                table[idx].erase(it);
-                break;
-            }
-        }
+        Node* n = new Node(k,v);
+        n->next = table[idx];
+        table[idx] = n;
     }
-    void search(int k) {
+
+    void deleteKey(int k) {
         int idx = hashFunc(k);
-        for(auto &p: table[idx]) {
-            if(p.first==k) {
-                cout<<p.second<<endl;
+        Node* t = table[idx];
+        Node* p = NULL;
+        while(t) {
+            if(t->key==k) {
+                if(p) p->next = t->next;
+                else table[idx] = t->next;
+                delete t;
                 return;
             }
+            p = t;
+            t = t->next;
+        }
+    }
+
+    void searchKey(int k) {
+        int idx = hashFunc(k);
+        Node* t = table[idx];
+        while(t) {
+            if(t->key==k) {
+                cout<<t->value<<endl;
+                return;
+            }
+            t=t->next;
         }
         cout<<"Not found"<<endl;
     }
+
     void display() {
         for(int i=0;i<10;i++) {
-            for(auto &p: table[i]) {
-                cout<<"("<<p.first<<","<<p.second<<") ";
+            Node* t = table[i];
+            while(t) {
+                cout<<"("<<t->key<<","<<t->value<<") ";
+                t=t->next;
             }
             cout<<endl;
         }
@@ -40,8 +71,10 @@ public:
 
 int main() {
     Hash h;
-    h.insert(1,"A");
-    h.insert(2,"B");
-    h.insert(12,"C");
+    h.insertKey(1,"A");
+    h.insertKey(2,"B");
+    h.insertKey(12,"C");
+    h.searchKey(12);
+    h.deleteKey(2);
     h.display();
 }
